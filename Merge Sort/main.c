@@ -2,29 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 
-void merge(int L[], int left_count, int R[], int right_count, int a[]){
-	int i = 0, j = 0, k = 0;
+void merge(int L[], int left_count, int R[], int right_count, int out[])
+{
+	int left_iter = 0, right_iter = 0, out_iter = 0;
 
-	while(i < left_count && j < right_count){
-		if(L[i] <= R[j])
-			a[k] = L[i++];
+	while(left_iter < left_count && right_iter < right_count)
+	{
+		if(L[left_iter] <= R[right_iter])
+			out[out_iter] = L[left_iter++];
 		else
-			a[k] = R[j++];
-		k++;
+			out[out_iter] = R[right_iter++];
+		out_iter++;
 	}
-	if(i == left_count)
-		memcpy(&a[k], &R[j], sizeof(R[0]) * (right_count - j));
+
+	// Process the rest of elements
+	if(left_iter == left_count)
+		while (out_iter < (left_count + right_count))
+			out[out_iter++] = R[right_iter++];
 	else
-		memcpy(&a[k], &L[j], sizeof(L[0]) * (left_count - i));
+		while (out_iter < (left_count + right_count))
+			out[out_iter++] = L[left_iter++];
 }
 
-void mergesort(int a[], int n){
-	int i;
-	int split = n / 2;
-	int *L = (int *)malloc(split * sizeof(a[0]));
-	int *R = (int *)malloc((n - split) * sizeof(a[0]));
+void mergesort(int a[], int n)
+{
+	int i = 0, split = n / 2;
+	int *L = malloc(split * sizeof(a[0]));
+	int *R = malloc((n - split) * sizeof(a[0]));
 
-	if(n > 1){
+	if(n > 1)
+	{
 		for(i = 0; i < split; i++)
 			L[i] = a[i];
 		for(i = split; i < n; i++)
@@ -37,13 +44,18 @@ void mergesort(int a[], int n){
 	free(R);
 }
 
-int main(int argc, char *argv[]){
-	int i;
-	int v[10] = {1, 3, 5, 7, 9, 2, 4, 6, 8, 10};
+int main(int argc, char *argv[])
+{
+	int i = 0;
+	const int size = 300;
+	int v[size];
 
-	mergesort(v, 10);
+	for (i = 0; i < size; i++)
+		v[i] = i % 17;
 
-	for(i = 0; i < 10; i++)
+	mergesort(v, size);
+
+	for(i = 0; i < size; i++)
 		printf("%d ", v[i]);
 
 	scanf("%d", &i);
