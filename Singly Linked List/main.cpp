@@ -4,74 +4,74 @@
 template<typename T>
 struct link
 {
+	using pointer = std::shared_ptr<link>;
+
 	T data;
-	std::shared_ptr<link> next;
+	pointer next = {};
 
-	link(T value) : data(value) {}
-	void add_to_end(T value)
-	{
-		if (next)
-			next->add_to_end(value);
-		else
-			next.reset(new link(value));
-	}
-
+	link(T value) : data{ std::move(value) } {}
 };
 
 template<typename T>
 class linked_list
 {
+	using link_pointer = typename link<T>::pointer;
+
 public:
 	linked_list() : head(nullptr) {};
 	~linked_list() {};
 
 	void push(T elem);
-	void show(void);
-	void reverse(void);
+	void show() const;
+	void reverse();
 private:
-	std::shared_ptr<link<T>> head;
+	link_pointer head = {};
+	link<T> *tail = nullptr;
 };
 
 template<typename T>
 void linked_list<T>::push(T elem)
 {
-	if (head == nullptr)
-		head.reset(new link<T>(elem));
+	auto new_link = new link<T>(std::move(elem));
+
+	if (tail)
+		tail->next.reset(new_link);
 	else
-		head->add_to_end(elem);
+		head.reset(new_link);
+	tail = new_link;
 }
 
 template<typename T>
 void linked_list<T>::reverse(void)
 {
-	std::shared_ptr<link<T>> prev;
-	std::shared_ptr<link<T>> next;
+	if (!head) return;
 
-	if (head == nullptr) return;
+	link_pointer prev;
+	link_pointer next;
 
 	while (head->next)
 	{
-		next = head->next;
-		head->next = prev;
-		prev = head;
-		head = next;
+		next = std::move(head->next);
+		head->next = std::move(prev);
+		prev = std::move(head);
+		head = std::move(next);
 	}
-	head->next = prev;
+	head->next = std::move(prev);
 }
 
 template<typename T>
-void linked_list<T>::show(void)
+void linked_list<T>::show(void) const
 {
-	std::shared_ptr<link<T>> current(head);
+	auto current = head.get();
 	while (current)
 	{
 		std::cout << current->data << std::endl;
-		current = current->next;
+		current = current->next.get();
 	}
 }
 
 
-int main(int argc, char *argv[])
+int main()
 {
 	linked_list<int> list;
 
